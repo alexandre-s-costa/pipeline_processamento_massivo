@@ -72,9 +72,6 @@ O fluxo de dados foi desenhado para garantir rastreabilidade, qualidade e perfor
 - **Função**: Armazenar os dados brutos ingeridos do CSV, servindo como *landing zone*.
 - **Formato**: Tabela externa apontando para o arquivo CSV no HDFS.
 
-<details>
-<summary>Clique para ver o script HQL de criação</summary>
-
 ```sql
 DROP TABLE IF EXISTS bronze_processos;
 
@@ -95,14 +92,10 @@ LOCATION '/datalake/bronze/processos/'
 TBLPROPERTIES ("skip.header.line.count"="1");
 ```
 
-</details>
-
 ### 🥈 Camada Silver: `silver_processos`
 - **Função**: Estruturar, limpar e enriquecer os dados. Nesta etapa, normalizamos datas, limpamos campos de texto e "explodimos" registros de pendências para análise individual. A tabela é particionada por ano e mês para otimizar a performance das consultas.
 - **Formato**: Tabela gerenciada, armazenada em Parquet e particionada.
 
-<details>
-<summary>Clique para ver o script HQL de ETL</summary>
 
 ```sql
 -- Criação da tabela (se não existir)
@@ -168,7 +161,7 @@ SELECT
 FROM final
 WHERE dt_pendente_inicio IS NOT NULL;
 ```
-</details>
+
 
 ### 🥇 Camada Gold: Tabelas Analíticas
 - **Função**: Criar agregações e visões de negócio para consumo final. São tabelas menores, altamente otimizadas e que respondem a perguntas de negócio específicas.
@@ -176,9 +169,6 @@ WHERE dt_pendente_inicio IS NOT NULL;
 
 #### `gold_tempo_por_orgao`
 Calcula o tempo médio de baixa e de pendência por órgão julgador, mês e ano.
-
-<details>
-<summary>Clique para ver o script HQL</summary>
 
 ```sql
 CREATE TABLE IF NOT EXISTS gold_tempo_por_orgao (
@@ -202,13 +192,11 @@ FROM silver_processos
 WHERE ano IS NOT NULL AND mes IS NOT NULL
 GROUP BY orgao_julgador, ano, mes;
 ```
-</details>
+
 
 #### `gold_classes_tempo_pendente`
 Identifica as classes processuais com maior tempo médio e máximo de pendência.
 
-<details>
-<summary>Clique para ver o script HQL</summary>
 
 ```sql
 CREATE TABLE IF NOT EXISTS gold_classes_tempo_pendente (
@@ -232,13 +220,10 @@ FROM silver_processos
 WHERE dt_pendente_inicio IS NOT NULL AND dt_pendente_fim IS NOT NULL
 GROUP BY classe, ano, mes;
 ```
-</details>
 
 #### `gold_orgao_tempo_pendente`
 Identifica os órgãos julgadores com maior tempo médio e máximo de pendência.
 
-<details>
-<summary>Clique para ver o script HQL</summary>
 
 ```sql
 CREATE TABLE IF NOT EXISTS gold_orgao_tempo_pendente (
